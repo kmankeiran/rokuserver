@@ -3,6 +3,9 @@ const express = require('express');
 // like a traffic cop
 const router = express.Router();
 
+// import the sql connection
+const connect = require("../config/sqlConfig");
+
 // think of route handlers like PHP functions
 
 router.get("/", (req, res) => {
@@ -11,6 +14,7 @@ router.get("/", (req, res) => {
 });
 
 // this is the /api/users route handler location
+// You can duplicate the function for users if you have multiple
 router.get("/users", (req, res) => {
     // run a SQL query here
     // res.json(query result here)
@@ -20,9 +24,20 @@ router.get("/users", (req, res) => {
 
 router.get("/movies", (req, res) => {
     // run a SQL query here -> get all movies from my DB
-    // res.json(query result here)
-    // echo a message -> just like PHP
-    res.json({message: "all movies route"});
+    connect.getConnection(function(err, connection) {
+        if (err) throw err; // not connected!
+       
+        // Use the connection
+        connection.query('SELECT * FROM tbl_movies', function (error, results) {
+          // When done with the connection, release it.
+          connection.release();
+       
+          // Handle error after the release.
+          if (error) throw error;
+
+          res.json(results);
+        });
+    });
 })
 
 // dynamic route handler that can accept a parameter
@@ -30,9 +45,13 @@ router.get("/movies", (req, res) => {
 // you're passing the id via the route: /api/movies/20, etc
 router.get("/movies/:id", (req, res) => {
     // run a SQL query here -> get all movies from my DB
-    // res.json(query result here)
-    // echo a message -> just like PHP
-    res.json({message: "get one movie route", movie: req.params.id });
+    connect.query(`SELECT * FROM tbl_movies WHERE movies_id=${req.params.id}`, function (error, results) {
+
+        if (error) throw error;
+
+        console.log("results:", results, "fields:", fields);
+        res.json(results);
+      });
 })
 
 module.exports = router;
