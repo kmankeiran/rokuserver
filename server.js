@@ -1,12 +1,18 @@
 const express = require('express');
-const app = express();
+// const cookieParser = require('cookie-parser');
+// const session = require('express-session');
 
 const port = process.env.PORT || 5000;
+
+const app = express();
+
+// set up the session object
+// app.use(cookieParser());
 
 // this catches every route request - everytime you change your location bar, this function reacts to it and intercepts the route request.
 app.use((req, res, next) => {
     console.log('incoming request');
-    console.log(port);
+    // console.log(port, "session:", req.session.id);
 
     // next is the original route request ie. /api/users
     next(); // => send the user to the route they requested
@@ -16,6 +22,8 @@ app.use((req, res, next) => {
 
 // If the user ever enters the /api after the website url, direct it to the api JS file in the routes folder
 app.use("/api", require("./routes/api"));
+// test our session functionality
+app.use("/ums", require("./routes/ums"));
 
 // run the app at the PORT 
 app.listen(port, () => {

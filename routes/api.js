@@ -49,7 +49,7 @@ router.get("/movies/:id", (req, res) => {
 
         if (error) throw error;
 
-        console.log("results:", results, "fields:", fields);
+        console.log("results:", results);
         res.json(results);
       });
 })
