@@ -16,7 +16,6 @@ router.post('/admin/login', (req, res) => {
         }  else {
             res.status(404).res.json({failure: true, message: 'user not found'});
         }
-        res.status(200).json(results);
     });
 })
 
@@ -24,7 +23,7 @@ router.get('/admin/getusers', (req, res) => {
     connect.query('SELECT user_id, user_name, user_admin, user_access, user_avatar FROM tbl_user', (err, users) => {
         if (err) throw err;
 
-        res.status(200).json(results);
+        res.status(200).json(users);
     })
 })
 

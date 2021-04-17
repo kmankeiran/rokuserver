@@ -28,7 +28,7 @@ router.get("/movies", (req, res) => {
         if (err) throw err; // not connected!
        
         // Use the connection
-        connection.query('SELECT * FROM tbl_movies', function (error, results) {
+        connection.query('SELECT m.*, GROUP_CONCAT(g.genre_name) as genre_name FROM tbl_movies m NATURAL LEFT JOIN tbl_genre g NATURAL JOIN tbl_mov_genre GROUP BY m.movies_id', function (error, results) {
           // When done with the connection, release it.
           connection.release();
        
@@ -43,9 +43,9 @@ router.get("/movies", (req, res) => {
 // dynamic route handler that can accept a parameter
 // this is equivalent to $_GET["id"] => (req.params.id)
 // you're passing the id via the route: /api/movies/20, etc
-router.get("/movies/:id", (req, res) => {
+router.get("/movies/:filter", (req, res) => {
     // run a SQL query here -> get all movies from my DB
-    connect.query(`SELECT * FROM tbl_movies WHERE movies_id=${req.params.id}`, function (error, results) {
+    connect.query(`SELECT m.*, GROUP_CONCAT(g.genre_name) AS genre_name FROM tbl_movies m LEFT JOIN tbl_mov_genre link ON link.movies_id = m.movies_id LEFT JOIN tbl_genre g ON g.genre_id = link.genre_id WHERE g.genre_name LIKE "%${req.params.filter}%" GROUP BY m.movies_id`, function (error, results) {
 
         if (error) throw error;
 
