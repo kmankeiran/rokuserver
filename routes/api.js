@@ -3,6 +3,9 @@ const express = require('express');
 // like a traffic cop
 const router = express.Router();
 
+// import the sql connection
+const connect = require("../config/sqlConfig");
+
 // think of route handlers like PHP functions
 
 router.get("/", (req, res) => {
@@ -11,6 +14,7 @@ router.get("/", (req, res) => {
 });
 
 // this is the /api/users route handler location
+// You can duplicate the function for users if you have multiple
 router.get("/users", (req, res) => {
     // run a SQL query here
     // res.json(query result here)
@@ -20,19 +24,92 @@ router.get("/users", (req, res) => {
 
 router.get("/movies", (req, res) => {
     // run a SQL query here -> get all movies from my DB
-    // res.json(query result here)
-    // echo a message -> just like PHP
-    res.json({message: "all movies route"});
+    connect.getConnection(function(err, connection) {
+        if (err) throw err; // not connected!
+       
+        // Use the connection
+        connection.query('SELECT m.*, GROUP_CONCAT(g.genre_name) as genre_name FROM tbl_movies m NATURAL LEFT JOIN tbl_genre g NATURAL JOIN tbl_mov_genre GROUP BY m.movies_id', function (error, results) {
+          // When done with the connection, release it.
+          connection.release();
+       
+          // Handle error after the release.
+          if (error) throw error;
+
+          res.json(results);
+        });
+    });
 })
 
 // dynamic route handler that can accept a parameter
 // this is equivalent to $_GET["id"] => (req.params.id)
 // you're passing the id via the route: /api/movies/20, etc
-router.get("/movies/:id", (req, res) => {
+router.get("/movies/:filter", (req, res) => {
     // run a SQL query here -> get all movies from my DB
-    // res.json(query result here)
-    // echo a message -> just like PHP
-    res.json({message: "get one movie route", movie: req.params.id });
+    connect.query(`SELECT m.*, GROUP_CONCAT(g.genre_name) AS genre_name FROM tbl_movies m LEFT JOIN tbl_mov_genre link ON link.movies_id = m.movies_id LEFT JOIN tbl_genre g ON g.genre_id = link.genre_id WHERE g.genre_name LIKE "%${req.params.filter}%" GROUP BY m.movies_id`, function (error, results) {
+
+        if (error) throw error;
+
+        console.log("results:", results);
+        res.json(results);
+      });
+})
+
+router.get("/shows", (req, res) => {
+    // run a SQL query here -> get all movies from my DB
+    connect.getConnection(function(err, connection) {
+        if (err) throw err; // not connected!
+       
+        // Use the connection
+        connection.query('SELECT m.*, GROUP_CONCAT(g.genre_name) as genre_name FROM tbl_shows m NATURAL LEFT JOIN tbl_genre g NATURAL JOIN tbl_sho_genre GROUP BY m.shows_id', function (error, results) {
+          // When done with the connection, release it.
+          connection.release();
+       
+          // Handle error after the release.
+          if (error) throw error;
+
+          res.json(results);
+        });
+    });
+})
+
+router.get("/shows/:filter", (req, res) => {
+    // run a SQL query here -> get all movies from my DB
+    connect.query(`SELECT m.*, GROUP_CONCAT(g.genre_name) AS genre_name FROM tbl_shows m LEFT JOIN tbl_sho_genre link ON link.shows_id = m.shows_id LEFT JOIN tbl_genre g ON g.genre_id = link.genre_id WHERE g.genre_name LIKE "%${req.params.filter}%" GROUP BY m.shows_id`, function (error, results) {
+
+        if (error) throw error;
+
+        console.log("results:", results);
+        res.json(results);
+      });
+})
+
+router.get("/music", (req, res) => {
+    // run a SQL query here -> get all movies from my DB
+    connect.getConnection(function(err, connection) {
+        if (err) throw err; // not connected!
+       
+        // Use the connection
+        connection.query('SELECT m.*, GROUP_CONCAT(g.genre_name) as genre_name FROM tbl_music m NATURAL LEFT JOIN tbl_genre g NATURAL JOIN tbl_mus_genre GROUP BY m.music_id', function (error, results) {
+          // When done with the connection, release it.
+          connection.release();
+       
+          // Handle error after the release.
+          if (error) throw error;
+
+          res.json(results);
+        });
+    });
+})
+
+router.get("/music/:filter", (req, res) => {
+    // run a SQL query here -> get all movies from my DB
+    connect.query(`SELECT m.*, GROUP_CONCAT(g.genre_name) AS genre_name FROM tbl_music m LEFT JOIN tbl_mus_genre link ON link.music_id = m.music_id LEFT JOIN tbl_genre g ON g.genre_id = link.genre_id WHERE g.genre_name LIKE "%${req.params.filter}%" GROUP BY m.music_id`, function (error, results) {
+
+        if (error) throw error;
+
+        console.log("results:", results);
+        res.json(results);
+      });
 })
 
 module.exports = router;
