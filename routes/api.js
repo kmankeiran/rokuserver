@@ -54,4 +54,62 @@ router.get("/movies/:filter", (req, res) => {
       });
 })
 
+router.get("/shows", (req, res) => {
+    // run a SQL query here -> get all movies from my DB
+    connect.getConnection(function(err, connection) {
+        if (err) throw err; // not connected!
+       
+        // Use the connection
+        connection.query('SELECT m.*, GROUP_CONCAT(g.genre_name) as genre_name FROM tbl_shows m NATURAL LEFT JOIN tbl_genre g NATURAL JOIN tbl_sho_genre GROUP BY m.shows_id', function (error, results) {
+          // When done with the connection, release it.
+          connection.release();
+       
+          // Handle error after the release.
+          if (error) throw error;
+
+          res.json(results);
+        });
+    });
+})
+
+router.get("/shows/:filter", (req, res) => {
+    // run a SQL query here -> get all movies from my DB
+    connect.query(`SELECT m.*, GROUP_CONCAT(g.genre_name) AS genre_name FROM tbl_shows m LEFT JOIN tbl_sho_genre link ON link.shows_id = m.shows_id LEFT JOIN tbl_genre g ON g.genre_id = link.genre_id WHERE g.genre_name LIKE "%${req.params.filter}%" GROUP BY m.shows_id`, function (error, results) {
+
+        if (error) throw error;
+
+        console.log("results:", results);
+        res.json(results);
+      });
+})
+
+router.get("/music", (req, res) => {
+    // run a SQL query here -> get all movies from my DB
+    connect.getConnection(function(err, connection) {
+        if (err) throw err; // not connected!
+       
+        // Use the connection
+        connection.query('SELECT m.*, GROUP_CONCAT(g.genre_name) as genre_name FROM tbl_music m NATURAL LEFT JOIN tbl_genre g NATURAL JOIN tbl_mus_genre GROUP BY m.music_id', function (error, results) {
+          // When done with the connection, release it.
+          connection.release();
+       
+          // Handle error after the release.
+          if (error) throw error;
+
+          res.json(results);
+        });
+    });
+})
+
+router.get("/music/:filter", (req, res) => {
+    // run a SQL query here -> get all movies from my DB
+    connect.query(`SELECT m.*, GROUP_CONCAT(g.genre_name) AS genre_name FROM tbl_music m LEFT JOIN tbl_mus_genre link ON link.music_id = m.music_id LEFT JOIN tbl_genre g ON g.genre_id = link.genre_id WHERE g.genre_name LIKE "%${req.params.filter}%" GROUP BY m.music_id`, function (error, results) {
+
+        if (error) throw error;
+
+        console.log("results:", results);
+        res.json(results);
+      });
+})
+
 module.exports = router;
